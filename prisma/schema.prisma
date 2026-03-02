@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  avatar        String?
+  githubId      String?   @unique
+  googleId      String?   @unique
+  
+  // 偏好设置
+  settings      Json?     // { theme, language, aiModel, reminderTime }
+  
+  // 关联
+  workLogs      WorkLog[]
+  tasks         Task[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// 工作日志（按天）
+model WorkLog {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @db.Date  // 只存日期
+  
+  // 内容
+  content     String   // 原始对话内容
+  summary     String?  // AI生成的总结
+  
+  // 统计
+  completedCount Int   @default(0)
+  blockedCount   Int   @default(0)
+  
+  // 关联
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+// 任务项
+model Task {
+  id          String    @id @default(cuid())
+  userId      String
+  workLogId   String?
+  
+  // 基本信息
+  title       String
+  description String?
+  
+  // 状态: completed | in_progress | blocked
+  status      String    @default("in_progress")
+  
+  // 阻塞原因（当status为blocked时）
+  blockReason String?
+  blockAction String?   // 已采取的行动
+  
+  // 标签
+  tags        String[]  // ["frontend", "backend", "design"]
+  
+  // 优先级: low | medium | high
+  priority    String    @default("medium")
+  
+  // 时间追踪
+  startedAt   DateTime?
+  completedAt DateTime?
+  deadline    DateTime?
+  
+  // 提醒设置
+  remindAt    DateTime? // 自定义提醒时间
+  
+  // 关联
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workLog     WorkLog?  @relation(fields: [workLogId], references: [id])
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+// AI对话记录（用于分析优化）
+model AIConversation {
+  id          String   @id @default(cuid())
+  userId      String
+  
+  role        String   // "user" | "assistant"
+  content     String
+  
+  // 元数据
+  metadata    Json?    // { model, tokens, duration }
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId, createdAt])
+}
+
+// 周报/月报缓存
+model Report {
+  id          String   @id @default(cuid())
+  userId      String
+  
+  type        String   // "weekly" | "monthly" | "quarterly"
+  startDate   DateTime
+  endDate     DateTime
+  
+  content     String   // Markdown格式的报告
+  stats       Json     // { completed, blocked, completionRate }
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([userId, type, startDate])
+}

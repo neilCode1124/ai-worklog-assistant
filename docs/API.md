@@ -11,9 +11,11 @@
 ## 认证相关
 
 ### POST `/auth/register`
+
 用户注册
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -23,6 +25,7 @@
 ```
 
 **Response:**
+
 ```json
 {
   "user": {
@@ -35,9 +38,11 @@
 ```
 
 ### POST `/auth/login`
+
 用户登录
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -46,6 +51,7 @@
 ```
 
 **Response:**
+
 ```json
 {
   "user": { ... },
@@ -54,9 +60,11 @@
 ```
 
 ### GET `/auth/github`
+
 GitHub OAuth 登录（跳转）
 
 ### GET `/auth/google`
+
 Google OAuth 登录（跳转）
 
 ---
@@ -64,15 +72,18 @@ Google OAuth 登录（跳转）
 ## 工作日志
 
 ### GET `/worklogs`
+
 获取工作日志列表
 
 **Query Parameters:**
+
 - `startDate` (optional): ISO日期格式，如 `2026-03-01`
 - `endDate` (optional): ISO日期格式
 - `page` (optional): 页码，默认 1
 - `limit` (optional): 每页数量，默认 20
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -94,12 +105,15 @@ Google OAuth 登录（跳转）
 ```
 
 ### GET `/worklogs/:date`
+
 获取指定日期的工作日志
 
 **Params:**
+
 - `date`: 日期格式 `YYYY-MM-DD`
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -123,17 +137,20 @@ Google OAuth 登录（跳转）
 ```
 
 ### POST `/worklogs`
+
 创建工作日志（通过自然对话）
 
 **Request:**
+
 ```json
 {
   "content": "今天搞定了no-mandate字段调整，但是process结果页还有问题，已经反馈给产品了",
-  "date": "2026-03-02"  // optional，默认今天
+  "date": "2026-03-02" // optional，默认今天
 }
 ```
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -146,7 +163,7 @@ Google OAuth 登录（跳转）
       "confidence": 0.95
     },
     {
-      "id": "task_2", 
+      "id": "task_2",
       "title": "process结果页问题修复",
       "status": "blocked",
       "blockReason": "等待产品反馈",
@@ -154,16 +171,16 @@ Google OAuth 登录（跳转）
     }
   ],
   "summary": "今日完成no-mandate字段调整，process结果页问题已反馈产品等待响应。",
-  "suggestions": [
-    "建议明天主动跟进产品进度"
-  ]
+  "suggestions": ["建议明天主动跟进产品进度"]
 }
 ```
 
 ### PUT `/worklogs/:id`
+
 更新工作日志
 
 **Request:**
+
 ```json
 {
   "content": "更新的内容...",
@@ -172,6 +189,7 @@ Google OAuth 登录（跳转）
 ```
 
 ### DELETE `/worklogs/:id`
+
 删除工作日志
 
 ---
@@ -179,9 +197,11 @@ Google OAuth 登录（跳转）
 ## 任务管理
 
 ### GET `/tasks`
+
 获取任务列表
 
 **Query Parameters:**
+
 - `status` (optional): `completed` | `in_progress` | `blocked` | `all`
 - `tag` (optional): 标签筛选
 - `priority` (optional): `low` | `medium` | `high`
@@ -189,6 +209,7 @@ Google OAuth 登录（跳转）
 - `page`, `limit`
 
 **Response:**
+
 ```json
 {
   "data": [
@@ -213,12 +234,15 @@ Google OAuth 登录（跳转）
 ```
 
 ### GET `/tasks/:id`
+
 获取单个任务详情
 
 ### POST `/tasks`
+
 创建任务
 
 **Request:**
+
 ```json
 {
   "title": "string",
@@ -232,9 +256,11 @@ Google OAuth 登录（跳转）
 ```
 
 ### PUT `/tasks/:id`
+
 更新任务
 
 **Request:**
+
 ```json
 {
   "status": "completed",
@@ -243,9 +269,11 @@ Google OAuth 登录（跳转）
 ```
 
 ### PUT `/tasks/:id/block`
+
 标记任务为阻塞
 
 **Request:**
+
 ```json
 {
   "reason": "等待后端接口",
@@ -254,9 +282,11 @@ Google OAuth 登录（跳转）
 ```
 
 ### PUT `/tasks/:id/unblock`
+
 解除阻塞状态
 
 ### DELETE `/tasks/:id`
+
 删除任务
 
 ---
@@ -264,9 +294,11 @@ Google OAuth 登录（跳转）
 ## AI 对话
 
 ### POST `/ai/chat`
+
 与AI助手对话（记录工作）
 
 **Request:**
+
 ```json
 {
   "message": "今天完成了登录功能，但是支付模块遇到个问题",
@@ -278,6 +310,7 @@ Google OAuth 登录（跳转）
 ```
 
 **Response:**
+
 ```json
 {
   "reply": "收到！我帮你记录一下：\n\n✅ 已完成：登录功能\n⏳ 阻塞中：支付模块问题\n\n能详细说说支付模块遇到什么问题了？",
@@ -287,23 +320,26 @@ Google OAuth 登录（跳转）
       { "title": "支付模块问题", "status": "blocked" }
     ]
   },
-  "shouldSave": false  // 是否自动保存到工作日志
+  "shouldSave": false // 是否自动保存到工作日志
 }
 ```
 
 ### POST `/ai/summarize`
+
 生成工作总结
 
 **Request:**
+
 ```json
 {
-  "type": "daily",  // daily | weekly | monthly
+  "type": "daily", // daily | weekly | monthly
   "date": "2026-03-02",
-  "workLogId": "string"  // optional
+  "workLogId": "string" // optional
 }
 ```
 
 **Response:**
+
 ```json
 {
   "summary": "markdown格式的总结...",
@@ -317,9 +353,11 @@ Google OAuth 登录（跳转）
 ```
 
 ### POST `/ai/suggest`
+
 获取工作建议
 
 **Request:**
+
 ```json
 {
   "context": "最近一周有3个任务被阻塞"
@@ -327,6 +365,7 @@ Google OAuth 登录（跳转）
 ```
 
 **Response:**
+
 ```json
 {
   "suggestions": [
@@ -336,7 +375,7 @@ Google OAuth 登录（跳转）
       "action": "查看阻塞任务"
     },
     {
-      "type": "tip", 
+      "type": "tip",
       "message": "上午9-11点是你最高效的时间段",
       "action": "把重要任务安排在这个时段"
     }
@@ -349,17 +388,21 @@ Google OAuth 登录（跳转）
 ## 报告生成
 
 ### GET `/reports`
+
 获取报告列表
 
 **Query Parameters:**
+
 - `type`: `weekly` | `monthly` | `quarterly`
 - `year`: 年份
 - `page`, `limit`
 
 ### GET `/reports/:id`
+
 获取单个报告
 
 **Response:**
+
 ```json
 {
   "id": "string",
@@ -377,9 +420,11 @@ Google OAuth 登录（跳转）
 ```
 
 ### POST `/reports/generate`
+
 生成新报告
 
 **Request:**
+
 ```json
 {
   "type": "weekly",
@@ -389,9 +434,11 @@ Google OAuth 登录（跳转）
 ```
 
 ### GET `/reports/:id/export`
+
 导出报告（PDF/Markdown）
 
 **Query Parameters:**
+
 - `format`: `pdf` | `markdown`
 
 ---
@@ -399,9 +446,11 @@ Google OAuth 登录（跳转）
 ## 统计与分析
 
 ### GET `/stats/overview`
+
 获取数据概览
 
 **Response:**
+
 ```json
 {
   "thisWeek": {
@@ -414,19 +463,22 @@ Google OAuth 登录（跳转）
     "blocked": 3,
     "completionRate": 77
   },
-  "trend": "up",  // up | down | stable
-  "streakDays": 5  // 连续记录天数
+  "trend": "up", // up | down | stable
+  "streakDays": 5 // 连续记录天数
 }
 ```
 
 ### GET `/stats/trends`
+
 获取趋势数据
 
 **Query Parameters:**
+
 - `metric`: `completion` | `productivity` | `blocking`
 - `period`: `7d` | `30d` | `90d`
 
 **Response:**
+
 ```json
 {
   "labels": ["周一", "周二", "周三", "周四", "周五"],
@@ -440,9 +492,11 @@ Google OAuth 登录（跳转）
 ```
 
 ### GET `/stats/tags`
+
 获取标签统计
 
 **Response:**
+
 ```json
 {
   "tags": [
@@ -458,12 +512,14 @@ Google OAuth 登录（跳转）
 ## 用户设置
 
 ### GET `/settings`
+
 获取用户设置
 
 **Response:**
+
 ```json
 {
-  "theme": "system",  // light | dark | system
+  "theme": "system", // light | dark | system
   "language": "zh-CN",
   "aiModel": "gpt-4",
   "reminderTime": "09:00",
@@ -476,6 +532,7 @@ Google OAuth 登录（跳转）
 ```
 
 ### PUT `/settings`
+
 更新用户设置
 
 ---
@@ -487,6 +544,7 @@ Google OAuth 登录（跳转）
 ### 事件类型
 
 #### `chat.message`
+
 AI对话实时流式响应
 
 ```json
@@ -500,6 +558,7 @@ AI对话实时流式响应
 ```
 
 #### `notification`
+
 系统通知推送
 
 ```json
@@ -524,25 +583,23 @@ AI对话实时流式响应
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "请求参数错误",
-    "details": [
-      { "field": "email", "message": "邮箱格式不正确" }
-    ]
+    "details": [{ "field": "email", "message": "邮箱格式不正确" }]
   }
 }
 ```
 
 ### 错误码
 
-| Code | HTTP Status | 说明 |
-|------|-------------|------|
-| `UNAUTHORIZED` | 401 | 未授权，需要登录 |
-| `FORBIDDEN` | 403 | 无权限访问 |
-| `NOT_FOUND` | 404 | 资源不存在 |
-| `VALIDATION_ERROR` | 422 | 参数验证失败 |
-| `RATE_LIMIT` | 429 | 请求过于频繁 |
-| `INTERNAL_ERROR` | 500 | 服务器内部错误 |
+| Code               | HTTP Status | 说明             |
+| ------------------ | ----------- | ---------------- |
+| `UNAUTHORIZED`     | 401         | 未授权，需要登录 |
+| `FORBIDDEN`        | 403         | 无权限访问       |
+| `NOT_FOUND`        | 404         | 资源不存在       |
+| `VALIDATION_ERROR` | 422         | 参数验证失败     |
+| `RATE_LIMIT`       | 429         | 请求过于频繁     |
+| `INTERNAL_ERROR`   | 500         | 服务器内部错误   |
 
 ---
 
-*文档版本: v1.0*
-*最后更新: 2026-03-02*
+_文档版本: v1.0_
+_最后更新: 2026-03-02_

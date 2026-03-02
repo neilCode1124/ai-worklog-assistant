@@ -13,22 +13,22 @@
 
 ```
 ┌─────────────────┐
-│   微信小程序    │  ← 用户入口
+│   Next.js 应用   │  ← 用户入口
 └────────┬────────┘
          │ HTTPS
 ┌────────▼────────┐
-│   API Gateway   │  ← 统一接入层
+│   API Routes    │  ← 统一接入层
 └────────┬────────┘
          │
 ┌────────▼────────┐
 │  Node.js服务    │  ← 业务逻辑
-│  (Express)      │
+│  (Next.js API)  │
 └────────┬────────┘
          │
     ┌────┴────┐
     │         │
 ┌───▼───┐  ┌──▼────┐
-│MongoDB│  │ Redis │  ← 数据层
+│ SQLite│  │ Redis │  ← 数据层
 └───────┘  └───────┘
     │
 ┌───▼───────────┐
@@ -39,90 +39,85 @@
 
 ### 1.2 技术选型理由
 
-| 组件 | 选择 | 理由 |
-|------|------|------|
-| 前端 | 微信小程序 | 开发快、易传播、无需下载 |
-| 后端 | Node.js + Express | 快速开发、生态丰富、适合实时通信 |
-| 数据库 | MongoDB | Schema灵活，适合快速迭代 |
-| 缓存 | Redis | 会话管理、定时任务队列 |
-| AI | OpenAI API | 中文理解好、API稳定 |
-| 部署 | 阿里云ECS | 国内访问快、成本可控 |
+| 组件   | 选择               | 理由                                          |
+| ------ | ------------------ | --------------------------------------------- |
+| 前端   | Next.js 14         | 开源影响力大、SEO友好、全栈能力强、开发效率高 |
+| 后端   | Next.js API Routes | 与前端同构、部署简单、TypeScript支持好        |
+| 数据库 | SQLite/PostgreSQL  | Prisma ORM支持、易于部署、性能稳定            |
+| 缓存   | Redis              | 会话管理、定时任务队列                        |
+| AI     | OpenAI API         | 中文理解好、API稳定                           |
+| 部署   | Vercel/Netlify     | 一键部署、自动缩放、全球CDN                   |
 
 ---
 
 ## 2. 数据库设计
 
-### 2.1 集合结构
+### 2.1 Prisma Schema
 
-#### users - 用户表
-```javascript
-{
-  _id: ObjectId,
-  openid: String,           // 微信openid
-  nickname: String,         // 昵称
-  avatar: String,           // 头像URL
-  settings: {
-    reminderTime: "09:00",  // 提醒时间
-    aiPersonality: "lively", // AI性格
-    summaryTemplate: "default"
-  },
-  createdAt: Date,
-  updatedAt: Date
+```prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
 }
-```
 
-#### worklogs - 工作日志表
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  date: "2026-03-02",       // 日期
-  items: [
-    {
-      id: "uuid",
-      content: "完成登录接口",
-      status: "completed",   // completed / in_progress / blocked
-      tags: ["后端", "API"],
-      createdAt: Date,
-      updatedAt: Date
-    }
-  ],
-  summary: {                // AI生成的总结
-    completed: ["..."],
-    blocked: ["..."],
-    suggestions: "..."
-  },
-  rawConversation: String,  // 原始对话记录
-  createdAt: Date,
-  updatedAt: Date
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
-```
 
-#### blockers - 阻塞项追踪表
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  content: "支付模块待后端配合",
-  sourceLogId: ObjectId,    // 来源日志
-  status: "active",         // active / resolved / expired
-  daysBlocked: 3,           // 已阻塞天数
-  lastRemindedAt: Date,     // 上次提醒时间
-  createdAt: Date,
-  resolvedAt: Date
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  avatar       String?
+  reminderTime String   @default("09:00")
+  aiPersonality String  @default("lively")
+  summaryTemplate String @default("default")
+  worklogs     Worklog[]
+  blockers     Blocker[]
+  reminders    Reminder[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
-```
 
-#### reminders - 提醒记录表
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId,
-  type: "daily_summary",    // daily_summary / blocker_alert / weekly_report
-  scheduledAt: Date,        // 计划发送时间
-  sentAt: Date,             // 实际发送时间
-  content: String,          // 提醒内容
-  status: "pending"         // pending / sent / failed
+model Worklog {
+  id              String       @id @default(cuid())
+  userId          String
+  date            String       // YYYY-MM-DD
+  items           Json         // Array of work items
+  summary         Json?        // AI-generated summary
+  rawConversation String?      // Raw conversation history
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blockers        Blocker[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Blocker {
+  id            String   @id @default(cuid())
+  userId        String
+  worklogId     String
+  content       String
+  status        String   @default("active") // active / resolved / expired
+  daysBlocked   Int      @default(0)
+  lastRemindedAt DateTime?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  worklog       Worklog  @relation(fields: [worklogId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  resolvedAt    DateTime?
+}
+
+model Reminder {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // daily_summary / blocker_alert / weekly_report
+  scheduledAt DateTime
+  sentAt      DateTime?
+  content     String
+  status      String   @default("pending") // pending / sent / failed
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 ```
 
@@ -133,9 +128,11 @@
 ### 3.1 核心接口
 
 #### POST /api/chat
+
 **描述**: 处理用户对话，解析工作事项
 
 **请求**:
+
 ```json
 {
   "message": "今天完成了登录接口",
@@ -144,6 +141,7 @@
 ```
 
 **响应**:
+
 ```json
 {
   "reply": "收到！✅ 已完成：登录接口\n还有其他事项吗？",
@@ -156,10 +154,12 @@
 }
 ```
 
-#### GET /api/worklogs/:date
+#### GET /api/worklogs/[date]
+
 **描述**: 获取指定日期的工作日志
 
 **响应**:
+
 ```json
 {
   "date": "2026-03-02",
@@ -169,9 +169,11 @@
 ```
 
 #### GET /api/summary/daily
+
 **描述**: 生成每日总结
 
 **响应**:
+
 ```json
 {
   "date": "2026-03-02",
@@ -182,9 +184,11 @@
 ```
 
 #### GET /api/blockers
+
 **描述**: 获取当前阻塞项列表
 
 **响应**:
+
 ```json
 {
   "blockers": [
@@ -196,6 +200,18 @@
     }
   ]
 }
+```
+
+### 3.2 API Routes 结构
+
+```
+/src/app/api/
+├── chat/route.ts         # POST /api/chat
+├── worklogs/[date]/route.ts  # GET /api/worklogs/[date]
+├── summary/daily/route.ts  # GET /api/summary/daily
+├── blockers/route.ts      # GET /api/blockers
+└── auth/
+    └── [...nextauth]/route.ts  # 认证路由
 ```
 
 ---
@@ -261,42 +277,86 @@
 使用 node-cron 实现：
 
 ```javascript
+// src/app/api/cron/route.ts
+import { NextResponse } from "next/server";
+import cron from "node-cron";
+
 // 每天早上9点推送日报
-cron.schedule('0 9 * * 1-5', async () => {
+cron.schedule("0 9 * * 1-5", async () => {
   await generateDailySummaries();
 });
 
 // 每天下午6点检查阻塞项
-cron.schedule('0 18 * * *', async () => {
+cron.schedule("0 18 * * *", async () => {
   await checkAndRemindBlockers();
 });
 
 // 每周一上午10点推送周报
-cron.schedule('0 10 * * 1', async () => {
+cron.schedule("0 10 * * 1", async () => {
   await generateWeeklyReports();
 });
+
+export async function GET() {
+  return NextResponse.json({ message: "Cron jobs initialized" });
+}
 ```
 
-### 5.2 消息推送
+### 5.2 消息提醒
 
-使用微信订阅消息：
-- 用户首次使用时申请订阅权限
-- 定时触发时调用微信API推送
+使用以下方式实现提醒：
+
+- **站内通知**：在应用内显示通知中心
+- **邮件提醒**：发送邮件到用户注册邮箱
+- **浏览器通知**：使用 Web Push API
+- **移动端**：可通过 PWA 实现推送通知
+
+#### 通知中心设计
+
+```typescript
+// src/app/components/NotificationCenter.tsx
+import { useState, useEffect } from 'react';
+
+const NotificationCenter = () => {
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    // 从 API 获取通知
+    fetch('/api/notifications')
+      .then(res => res.json())
+      .then(data => setNotifications(data));
+  }, []);
+
+  return (
+    <div className="notification-center">
+      {notifications.map(notification => (
+        <div key={notification.id} className="notification">
+          <p>{notification.content}</p>
+          <span>{notification.createdAt}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default NotificationCenter;
+```
 
 ---
 
 ## 6. 安全考虑
 
 ### 6.1 数据安全
+
 - 数据库密码加密存储
 - API接口HTTPS强制
 - 敏感字段（openid）不返回给前端
 
 ### 6.2 访问控制
+
 - JWT Token验证
 - 用户只能访问自己的数据
 - API限流防刷
 
 ---
 
-*文档结束*
+_文档结束_

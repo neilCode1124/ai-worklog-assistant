@@ -124,7 +124,7 @@ ai-worklog-assistant/
 AI: ✅ 收到！已记录：
     - 完成：登录接口
     - 阻塞：支付模块问题
-    
+
     能说说遇到什么问题了？我可以帮你分析
 ```
 
@@ -135,7 +135,7 @@ AI: ✅ 收到！已记录：
 
 ✅ 已完成：
   · 登录接口开发
-  
+
 ⏳ 待跟进：
   · 支付模块问题（建议今天找后端对齐）
 
@@ -146,6 +146,7 @@ AI: ✅ 收到！已记录：
 ### 3. 周报自动生成
 
 每周一上午自动发送：
+
 - 本周完成情况统计
 - 关键成果 highlights
 - 下周计划建议
@@ -161,10 +162,10 @@ AI: ✅ 收到！已记录：
 
 ```typescript
 export const DEFAULT_SETTINGS = {
-  reminderTime: "09:00",      // 改为你的偏好时间
-  weeklyReportDay: 1,         // 周一 = 1
+  reminderTime: "09:00", // 改为你的偏好时间
+  weeklyReportDay: 1, // 周一 = 1
   timezone: "Asia/Shanghai",
-}
+};
 ```
 
 ### 更换 AI 模型
@@ -173,11 +174,11 @@ export const DEFAULT_SETTINGS = {
 
 ```typescript
 // 使用 Claude
-const model = "claude-3-opus-20240229"
+const model = "claude-3-opus-20240229";
 
 // 或使用国产模型
-const model = "qwen-turbo"  // 通义千问
-const model = "ernie-bot"   // 文心一言
+const model = "qwen-turbo"; // 通义千问
+const model = "ernie-bot"; // 文心一言
 ```
 
 ---
@@ -191,20 +192,21 @@ const model = "ernie-bot"   // 文心一言
 3. 参考现有 API 的响应格式
 
 示例:
+
 ```typescript
 // src/app/api/tasks/route.ts
-import { auth } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
-  const session = await auth()
-  if (!session) return new Response("Unauthorized", { status: 401 })
-  
+  const session = await auth();
+  if (!session) return new Response("Unauthorized", { status: 401 });
+
   const tasks = await prisma.task.findMany({
-    where: { userId: session.user.id }
-  })
-  
-  return Response.json({ data: tasks })
+    where: { userId: session.user.id },
+  });
+
+  return Response.json({ data: tasks });
 }
 ```
 
@@ -254,16 +256,19 @@ npm start
 ## 常见问题
 
 **Q: 如何备份数据？**
+
 ```bash
 pg_dump $DATABASE_URL > backup.sql
 ```
 
 **Q: 如何重置数据库？**
+
 ```bash
 npx prisma migrate reset
 ```
 
 **Q: AI 调用失败怎么办？**
+
 - 检查 API Key 是否正确
 - 查看 OpenAI 控制台用量
 - 尝试切换备用模型
@@ -282,4 +287,4 @@ npx prisma migrate reset
 
 ---
 
-*有问题？提 Issue 或联系 maintainer*
+_有问题？提 Issue 或联系 maintainer_

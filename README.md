@@ -14,6 +14,7 @@
 ## 🌟 Features
 
 ### Core Features
+
 - 💬 **Natural Conversation** - Record work by chatting, no forms to fill
 - 🔔 **Smart Reminders** - Daily summaries at 9 AM, never miss follow-ups
 - 📊 **Auto Reports** - Weekly/Monthly reports generated automatically
@@ -22,13 +23,13 @@
 
 ### Why This?
 
-| Feature | Notion AI | Feishu | **AI Worklog Assistant** |
-|---------|-----------|--------|-------------------------|
-| Input Method | Write docs | Meeting records | **Chat naturally** |
-| Reminders | ❌ | ❌ | **✅ Proactive alerts** |
-| Task Tracking | ❌ | ❌ | **✅ Blocker detection** |
-| Personality | Cold tool | Cold tool | **✅ Friendly AI companion** |
-| Open Source | ❌ Closed | ❌ Closed | **✅ Fully open** |
+| Feature       | Notion AI  | Feishu          | **AI Worklog Assistant**     |
+| ------------- | ---------- | --------------- | ---------------------------- |
+| Input Method  | Write docs | Meeting records | **Chat naturally**           |
+| Reminders     | ❌         | ❌              | **✅ Proactive alerts**      |
+| Task Tracking | ❌         | ❌              | **✅ Blocker detection**     |
+| Personality   | Cold tool  | Cold tool       | **✅ Friendly AI companion** |
+| Open Source   | ❌ Closed  | ❌ Closed       | **✅ Fully open**            |
 
 ---
 
@@ -100,18 +101,20 @@ ai-worklog-assistant/
 ### Daily Workflow
 
 **1. Evening - Record Your Day**
+
 ```
-You: "Today I finished the login API, but got stuck on 
+You: "Today I finished the login API, but got stuck on
       payment integration. Need backend support."
 
 AI: "Got it! 📋
      ✅ Completed: Login API
      ⏳ Blocked: Payment integration (waiting for backend)
-     
+
      Anything else?"
 ```
 
 **2. Morning - Get Your Summary**
+
 ```
 🌅 Good morning! Yesterday's recap:
 
@@ -125,6 +128,7 @@ AI: "Got it! 📋
 ```
 
 **3. Monday - Weekly Report**
+
 ```
 📊 Weekly Summary (Mar 1-7)
 
@@ -148,6 +152,7 @@ Blocked: 1 task
 ## 🛣️ Roadmap
 
 ### Phase 1: MVP (Weeks 1-4)
+
 - [x] Natural language input
 - [x] Daily summaries
 - [x] Basic task tracking
@@ -155,12 +160,14 @@ Blocked: 1 task
 - [ ] Docker deployment
 
 ### Phase 2: Enhanced (Weeks 5-8)
+
 - [ ] Weekly/Monthly reports
 - [ ] Blocker reminders
 - [ ] Data visualization
 - [ ] Mobile responsive
 
 ### Phase 3: Advanced (Weeks 9-12)
+
 - [ ] Team collaboration
 - [ ] Slack/Discord integration
 - [ ] Custom AI prompts
@@ -209,9 +216,11 @@ This project is licensed under the MIT License - see [LICENSE](./LICENSE) file f
 ---
 
 <a name="中文"></a>
+
 ## 中文介绍
 
 ### 核心功能
+
 - 💬 **自然对话录入** - 像聊天一样记录工作，无需填表
 - 🔔 **智能提醒** - 每天早上9点自动推送昨日总结和今日待办
 - 📊 **自动生成报告** - 周报、月报一键生成
